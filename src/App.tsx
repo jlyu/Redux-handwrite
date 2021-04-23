@@ -1,16 +1,23 @@
 import React, {useContext, useState} from 'react';
 
 
+interface IUser {
+    name: string;
+    age?: number;
+}
+
 interface IAppState {
-    user: {
-        name: string;
-        age: number;
-    };
+    user: IUser;
 }
 
 interface ContextType {
     appState: IAppState;
     setAppState: (state: IAppState) => void;
+}
+
+interface IReducerType {
+    type: string;
+    payload: IAppState | IUser;
 }
 
 const appContext = React.createContext<ContextType | null>(null);
@@ -39,12 +46,25 @@ const User = () => {
         <div> User:{ contextValue.appState.user.name } </div>
     );
 };
+const reducer = (state: IAppState, { type, payload }: IReducerType ) => {
+    if (type === 'updateUser') {
+        return {
+            ...state,
+            user: {
+                ...state.user,
+                ...payload
+            }
+        };
+    } else {
+        return state;
+    }
+};
 
 const UserModifier = () => {
     const contextValue = useContext(appContext) as ContextType;
     const onChange = (e: any) => {
-        contextValue.appState.user.name = e.target.value;
-        contextValue.setAppState({...contextValue.appState});
+
+        contextValue.setAppState(reducer(contextValue.appState, {type: 'updateUser', payload: { name: e.target.value }}));
   };
   return (
     <div>
