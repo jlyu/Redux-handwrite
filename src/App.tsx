@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useState, JSXElementConstructor} from 'react';
 
 
 interface IUser {
@@ -10,7 +10,7 @@ interface IAppState {
     user: IUser;
 }
 
-interface ContextType {
+interface IContextType {
     appState: IAppState;
     setAppState: (state: IAppState) => void;
 }
@@ -20,12 +20,12 @@ interface IReducerType {
     payload: IAppState | IUser;
 }
 
-const appContext = React.createContext<ContextType | null>(null);
+const appContext = React.createContext<IContextType | null>(null);
 
 
-const 大儿子 = () => <section>大儿子<User/></section>;
-const 二儿子 = () => <section>二儿子<Wrapper/></section>;
-const 幺儿子 = () => <section>幺儿子</section>;
+const FirstSon = () => <section>FirstSon<User/></section>;
+const SecondSon = () => <section>SecondSon<UserModifier>Child</UserModifier></section>;
+const LittleSon = () => <section>LittleSon</section>;
 
 
 const reducer = (state: IAppState, { type, payload }: IReducerType ) => {
@@ -42,35 +42,36 @@ const reducer = (state: IAppState, { type, payload }: IReducerType ) => {
     }
 };
 
-
-const Wrapper = () => {
-    const { appState, setAppState } = useContext(appContext) as ContextType;
-    const dispatch = (action: IReducerType) => {
-        setAppState(reducer(appState, action));
+const connect = (Component: React.FC<any>) => {
+    return (props: React.ComponentProps<typeof Component>) => {
+        const { appState, setAppState } = useContext(appContext) as IContextType;
+        const dispatch = (action: IReducerType) => {
+            setAppState(reducer(appState, action));
+        };
+        return <Component {...props} dispatch={dispatch} state={appState} />;
     };
-    return <UserModifier dispatch={dispatch} state={appState} />;
 };
 
-const User = () => {
-    const { appState } = useContext(appContext) as ContextType;
+
+const User = connect(({state, children}: React.ComponentProps<typeof User>) => {
     return (
-        <div> User:{ appState.user.name } </div>
+        <div> {children} User:{ state.user.name } </div>
     );
-};
+});
 
-const UserModifier = ({dispatch, state} : any) => {
-    //const contextValue = useContext(appContext) as ContextType;
+
+const UserModifier = connect(({dispatch, state, children}: React.ComponentProps<typeof UserModifier>) => {
     const onChange = (e: any) => {
-
-        //contextValue.setAppState(reducer(contextValue.appState, {type: 'updateUser', payload: { name: e.target.value }}));
         dispatch({type: 'updateUser', payload: { name: e.target.value }});
-  };
-  return (
-    <div>
-      <input value={ state.user.name }
-             onChange={onChange}/>
-    </div>);
-};
+    };
+    return (
+        <div>
+        {children}
+        <input value={ state.user.name }
+                onChange={onChange}/>
+        </div>
+    );
+});
 
 
 export const App: React.FC = () => {
@@ -80,9 +81,9 @@ export const App: React.FC = () => {
     //const contextValue = { appState, setAppState };
     return (
         <appContext.Provider value={{ appState, setAppState }} >
-          <大儿子/>
-          <二儿子/>
-          <幺儿子/>
+          <FirstSon/>
+          <SecondSon/>
+          <LittleSon/>
         </appContext.Provider>
       );
 };
