@@ -1,18 +1,20 @@
 import * as React from 'react';
-import { appContext, connect, store } from './redux';
+import { appContext, connect, IAppState, store } from './redux';
 
 
 const FirstSon = () => <section>FirstSon<User/></section>;
 const SecondSon = () => <section>SecondSon<UserModifier>Child</UserModifier></section>;
 const LittleSon = () => <section>LittleSon</section>;
 
-const User = connect(({state, children}: React.ComponentProps<typeof User>) => {
+const User = connect((state: IAppState) => {
+    return { user: state.user };
+})(({ user }) => {
     return (
-        <div> {children} User:{ state.user.name } </div>
+        <div> User:{ user.name } </div>
     );
 });
 
-const UserModifier = connect(({dispatch, state, children}: React.ComponentProps<typeof UserModifier>) => {
+const UserModifier = connect(null)(({dispatch, state, children}: React.ComponentProps<typeof UserModifier>) => {
     const onChange = (e: any) => {
         dispatch({type: 'updateUser', payload: { name: e.target.value }});
     };

@@ -5,7 +5,7 @@ interface IUser {
     age: number;
 }
 
-interface IAppState {
+export interface IAppState {
     user: IUser;
 }
 
@@ -21,10 +21,11 @@ interface IReducerType {
     payload: IAppState | IUser;
 }
 
-export const connect = (Component: React.FC<any>) => {
+export const connect = (selector: any) => (Component: React.FC<any>) => {
     return (props: React.ComponentProps<typeof Component>) => {
         const { state, setState } = useContext(appContext) as IStoreType;
         const [, update] = useState({});
+        const data = selector ? selector(state) : {state};
 
         useEffect(() => {
             store.subscribe(() => {
@@ -35,7 +36,7 @@ export const connect = (Component: React.FC<any>) => {
         const dispatch = (action: IReducerType) => {
             setState(reducer(state, action));
         };
-        return <Component {...props} dispatch={dispatch} state={state} />;
+        return <Component {...props} {...data} dispatch={dispatch} />;
     };
 };
 
