@@ -1,6 +1,26 @@
 import * as React from 'react';
 import { connectToUser } from './connecters/connectToUser';
-import { appContext, connect, IAppState, store } from './redux';
+import { connect, createStore, IAppState, IReducerType, Provider} from './redux';
+
+const reducer = (state: IAppState, { type, payload }: IReducerType) => {
+    if (type === 'updateUser') {
+        return {
+            ...state,
+            user: {
+                ...state.user,
+                ...payload,
+            },
+        };
+    } else {
+        return state;
+    }
+};
+const initState = {
+        user: { name: 'chain', age: 33 },
+        group: { name: "FrontEnd" },
+    };
+
+const gStore = createStore(reducer, initState);
 
 
 const FirstSon = () => <section>FirstSon<User/></section>;
@@ -26,10 +46,10 @@ const UserModifier = connectToUser(({updateUser, user, children}: React.Componen
 
 export const App: React.FC = () => {
 
-    return <appContext.Provider value={store} >
+    return <Provider store={gStore} >
                 <FirstSon/>
                 <SecondSon/>
                 <LittleSon/>
-           </appContext.Provider>;
+           </Provider>;
 };
 
