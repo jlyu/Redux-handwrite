@@ -7,6 +7,7 @@ interface IUser {
 
 export interface IAppState {
     user: IUser;
+    group: object;
 }
 
 interface IStoreType {
@@ -21,6 +22,15 @@ interface IReducerType {
     payload: IAppState | IUser;
 }
 
+const changed = (oldState: IAppState, newState: IAppState) => {
+    for (const key in oldState) {
+        if (oldState[key as keyof IAppState] !== newState[key as keyof IAppState]) {
+            return true;
+        }
+    }
+    return false;
+};
+
 export const connect = (selector: any) => (Component: React.FC<any>) => {
     return (props: React.ComponentProps<typeof Component>) => {
         const { state, setState } = useContext(appContext) as IStoreType;
@@ -29,9 +39,12 @@ export const connect = (selector: any) => (Component: React.FC<any>) => {
 
         useEffect(() => {
             store.subscribe(() => {
-                update({});
+                const newData = selector ? selector(store.state) : { state: store.state };
+                if (changed(data, newData)) {
+                    update({});
+                }
             });
-        }, []);
+        }, [selector]);
 
         const dispatch = (action: IReducerType) => {
             setState(reducer(state, action));
@@ -55,7 +68,10 @@ const reducer = (state: IAppState, { type, payload }: IReducerType) => {
 };
 
 export const store: IStoreType = {
-    state: { user: { name: 'chain', age: 33 } },
+    state: {
+        user: { name: 'chain', age: 33 },
+        group: { name: "FrontEnd" },
+    },
     setState(newState: IAppState) {
         store.state = newState;
         store.listeners.map((fn) => fn(store.state));

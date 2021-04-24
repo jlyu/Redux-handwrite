@@ -4,11 +4,13 @@ import { appContext, connect, IAppState, store } from './redux';
 
 const FirstSon = () => <section>FirstSon<User/></section>;
 const SecondSon = () => <section>SecondSon<UserModifier>Child</UserModifier></section>;
-const LittleSon = () => <section>LittleSon</section>;
+const LittleSon = connect((state: IAppState) => {
+    return { group: state.group };
+}) ( ({ group }) => <section>LittleSon Group {group.name}</section> );
 
 const User = connect((state: IAppState) => {
     return { user: state.user };
-})(({ user }) => {
+}) (({ user }) => {
     return (
         <div> User:{ user.name } </div>
     );
