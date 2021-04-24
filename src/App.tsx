@@ -6,19 +6,25 @@ const FirstSon = () => <section>FirstSon<User/></section>;
 const SecondSon = () => <section>SecondSon<UserModifier>Child</UserModifier></section>;
 const LittleSon = connect((state: IAppState) => {
     return { group: state.group };
-}) ( ({ group }) => <section>LittleSon Group {group.name}</section> );
+}, null) ( ({ group }) => <section>LittleSon Group {group.name}</section> );
 
 const User = connect((state: IAppState) => {
     return { user: state.user };
-}) (({ user }) => {
+}, null) (({ user }) => {
     return (
         <div> User:{ user.name } </div>
     );
 });
 
-const UserModifier = connect(null)(({dispatch, state, children}: React.ComponentProps<typeof UserModifier>) => {
+const UserModifier = connect(null, (dispatch: any) => {
+
+    return {
+        updateUser: (attrs: IAppState) => dispatch({type: 'updateUser', payload: attrs})
+    };
+
+}) (({updateUser, state, children}: React.ComponentProps<typeof UserModifier>) => {
     const onChange = (e: any) => {
-        dispatch({type: 'updateUser', payload: { name: e.target.value }});
+        updateUser({ name: e.target.value });
     };
     return (
         <div>

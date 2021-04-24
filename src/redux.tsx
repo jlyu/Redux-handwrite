@@ -17,7 +17,7 @@ interface IStoreType {
     subscribe: (fn: any) => void;
 }
 
-interface IReducerType {
+export interface IReducerType {
     type: string;
     payload: IAppState | IUser;
 }
@@ -31,25 +31,25 @@ const changed = (oldState: IAppState, newState: IAppState) => {
     return false;
 };
 
-export const connect = (selector: any) => (Component: React.FC<any>) => {
+export const connect = (selector: any, mapDispatchToProps: any) => (Component: React.FC<any>) => {
     return (props: React.ComponentProps<typeof Component>) => {
         const { state, setState } = useContext(appContext) as IStoreType;
         const [, update] = useState({});
         const data = selector ? selector(state) : {state};
+        const dispatch = (action: IReducerType) => {
+            setState(reducer(state, action));
+        };
+        const dispatchers = mapDispatchToProps ? mapDispatchToProps(dispatch) : { dispatch };
 
-        useEffect(() => {
-            store.subscribe(() => {
+        useEffect(() => store.subscribe(() => {
                 const newData = selector ? selector(store.state) : { state: store.state };
                 if (changed(data, newData)) {
                     update({});
                 }
-            });
-        }, [selector]);
+        }), [selector]);
 
-        const dispatch = (action: IReducerType) => {
-            setState(reducer(state, action));
-        };
-        return <Component {...props} {...data} dispatch={dispatch} />;
+
+        return <Component {...props} {...data} {...dispatchers} />;
     };
 };
 
