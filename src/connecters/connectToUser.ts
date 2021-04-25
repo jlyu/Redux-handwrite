@@ -1,12 +1,13 @@
 import { connect, IAppState } from '../redux';
 
 const ajax = async (sPath: string) => {
-    if (!sPath) {
-        return undefined;
-    }
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            resolve({ data: { name: 'Chain. from 3 seconds later' } });
+            if (!sPath) {
+                reject();
+            } else {
+                resolve({ data: { name: 'Chain. from 3 seconds later' } });
+            }
         }, 3000);
     });
 };
@@ -26,7 +27,7 @@ const userSelector = (state: any) => {
 const userDispatcher = (dispatch: any) => {
     return {
         updateUser: (attrs: IAppState) => dispatch({ type: 'updateUser', payload: attrs }),
-        asyncFetchUser: () => dispatch(fetchUser), //fetchUser(dispatch),
+        asyncFetchUser: () => dispatch(fetchUser),
         promiseFetchUser: () => dispatch({ type: 'updateUser', payload: ajax('/user').then((response: any) => response.data) }),
     };
 };

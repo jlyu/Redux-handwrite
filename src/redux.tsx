@@ -14,7 +14,6 @@ type ReducerType = (state: IAppState, { type, payload }: IReducerType) => IAppSt
 
 interface IStoreType {
     getState: () => IAppState;
-    //setState: (state: IAppState) => void;
     dispatch: (action: IReducerType) => void;
     subscribe: (fn: any) => void;
 }
