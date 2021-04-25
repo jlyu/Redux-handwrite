@@ -69,6 +69,17 @@ dispatch = (action: any) => {
     }
 };
 
+const preDispatch2 = dispatch;
+dispatch = (action: any) => {
+    if (action?.payload instanceof Promise) {
+        action?.payload.then((data: any) => {
+            dispatch({...action, payload: data});
+        });
+    } else {
+        preDispatch2(action);
+    }
+};
+
 export const createStore = (initReducer: ReducerType, initState: IAppState) => {
     reducer = initReducer;
     state = initState;

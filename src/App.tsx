@@ -33,12 +33,12 @@ const User = connectToUser(({ user }) => {
     return <div> User:{ user.name } </div>;
 });
 
-const UserModifier = connectToUser(({fetchUser, updateUser, user, children}: React.ComponentProps<typeof UserModifier>) => {
+const UserModifier = connectToUser(({asyncFetchUser, promiseFetchUser, updateUser, user, children}: React.ComponentProps<typeof UserModifier>) => {
     const onChange = (e: any) => {
         updateUser({ name: e.target.value });
     };
     const onClick = (e: any) => {
-        fetchUser();
+        promiseFetchUser();
     };
 
     return <div>

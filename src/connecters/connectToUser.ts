@@ -11,7 +11,7 @@ const ajax = async (sPath: string) => {
     });
 };
 
-const fetchUser = (dispatch: any) => {
+const fetchUser = async (dispatch: any) => {
     ajax('/user')
         .then((response: any) => {
             dispatch({ type: 'updateUser', payload: response.data });
@@ -26,7 +26,8 @@ const userSelector = (state: any) => {
 const userDispatcher = (dispatch: any) => {
     return {
         updateUser: (attrs: IAppState) => dispatch({ type: 'updateUser', payload: attrs }),
-        fetchUser: () => dispatch(fetchUser), //fetchUser(dispatch),
+        asyncFetchUser: () => dispatch(fetchUser), //fetchUser(dispatch),
+        promiseFetchUser: () => dispatch({ type: 'updateUser', payload: ajax('/user').then((response: any) => response.data) }),
     };
 };
 
