@@ -13,10 +13,9 @@ export interface IAppState {
 type ReducerType = (state: IAppState, { type, payload }: IReducerType) => IAppState;
 
 interface IStoreType {
-    state?: IAppState;
-    reducer?: ReducerType;
-    setState: (state: IAppState) => void;
-    listeners: any[];
+    getState: () => IAppState;
+    //setState: (state: IAppState) => void;
+    dispatch: (action: IReducerType) => void;
     subscribe: (fn: any) => void;
 }
 
@@ -24,6 +23,7 @@ export interface IReducerType {
     type: string;
     payload: IAppState | IUser;
 }
+
 
 const changed = (oldState: IAppState, newState: IAppState) => {
     for (const key in oldState) {
@@ -34,47 +34,52 @@ const changed = (oldState: IAppState, newState: IAppState) => {
     return false;
 };
 
+let state: IAppState;
+let reducer: ReducerType;
+const listeners: any[] = [];
+
+const setState = (newState: IAppState) => {
+    state = newState;
+    listeners.map((fn) => fn(state));
+};
 
 const store: IStoreType = {
-    state: undefined,
-    reducer: undefined,
-    setState(newState: IAppState) {
-        store.state = newState;
-        store.listeners.map((fn) => fn(store.state));
+    getState() { return state; },
+    dispatch(action: IReducerType) {
+        setState((reducer as ReducerType)(state as IAppState, action));
     },
-    listeners: [],
+
     subscribe(fn) {
-        store.listeners.push(fn);
+        listeners.push(fn);
         return () => {
-            const index = store.listeners.indexOf(fn);
-            store.listeners.splice(index, 1);
+            const index = listeners.indexOf(fn);
+            listeners.splice(index, 1);
         };
     },
 };
 
 export const createStore = (initReducer: ReducerType, initState: IAppState) => {
-    store.reducer = initReducer;
-    store.state = initState;
+    reducer = initReducer;
+    state = initState;
     return store;
 };
 
 export const connect = (selector: any, mapDispatchToProps: any) => (Component: React.FC<any>) => {
     return (props: React.ComponentProps<typeof Component>) => {
-        const { state, setState } = useContext(appContext) as IStoreType;
         const [, update] = useState({});
         const data = selector ? selector(state) : {state};
 
-        const dispatch = (action: IReducerType) => {
-                setState((store.reducer as ReducerType)(state as IAppState, action));
-        };
+        // const dispatch = (action: IReducerType) => {
+        //     setState((reducer as ReducerType)(state as IAppState, action));
+        // };
 
-        const dispatchers = mapDispatchToProps ? mapDispatchToProps(dispatch) : { dispatch };
+        const dispatchers = mapDispatchToProps ? mapDispatchToProps(store.dispatch) : { dispatch: store.dispatch };
 
         useEffect(() => store.subscribe(() => {
-                const newData = selector ? selector(store.state) : { state: store.state };
-                if (changed(data, newData)) {
-                    update({});
-                }
+            const newData = selector ? selector(state) : { state: state };
+            if (changed(data, newData)) {
+                update({});
+            }
         }), [selector]);
 
         return <Component {...props} {...data} {...dispatchers} />;
@@ -87,5 +92,5 @@ export const Provider = ({store, children}: any) => {
 
     return <appContext.Provider value={store} >
                 {children}
-            </appContext.Provider>;
+           </appContext.Provider>;
 };

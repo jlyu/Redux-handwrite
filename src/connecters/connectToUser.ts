@@ -1,4 +1,3 @@
-//import * as React from 'react';
 import { connect, IAppState } from '../redux';
 
 const userSelector = (state: any) => {

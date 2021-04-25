@@ -18,7 +18,7 @@ const reducer = (state: IAppState, { type, payload }: IReducerType) => {
 const initState = {
         user: { name: 'chain', age: 33 },
         group: { name: "FrontEnd" },
-    };
+};
 
 const gStore = createStore(reducer, initState);
 
