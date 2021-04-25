@@ -33,14 +33,19 @@ const User = connectToUser(({ user }) => {
     return <div> User:{ user.name } </div>;
 });
 
-const UserModifier = connectToUser(({updateUser, user, children}: React.ComponentProps<typeof UserModifier>) => {
+const UserModifier = connectToUser(({fetchUser, updateUser, user, children}: React.ComponentProps<typeof UserModifier>) => {
     const onChange = (e: any) => {
         updateUser({ name: e.target.value });
     };
+    const onClick = (e: any) => {
+        fetchUser();
+    };
+
     return <div>
         {children}
-        <input value={ user.name }
-                onChange={onChange}/>
+        <input value={ user.name } onChange={onChange}/>
+
+        <button onClick={onClick}>async fetch user: </button>
         </div>;
 });
 

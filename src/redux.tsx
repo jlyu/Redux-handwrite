@@ -45,6 +45,7 @@ const setState = (newState: IAppState) => {
 
 const store: IStoreType = {
     getState() { return state; },
+
     dispatch(action: IReducerType) {
         setState((reducer as ReducerType)(state as IAppState, action));
     },
@@ -58,6 +59,16 @@ const store: IStoreType = {
     },
 };
 
+let dispatch = store.dispatch;
+const preDispatch = dispatch;
+dispatch = (action: any) => {
+    if (Object.prototype.toString.call(action) === "[object Function]") {
+        action(dispatch);
+    } else {
+        preDispatch(action);
+    }
+};
+
 export const createStore = (initReducer: ReducerType, initState: IAppState) => {
     reducer = initReducer;
     state = initState;
@@ -69,11 +80,7 @@ export const connect = (selector: any, mapDispatchToProps: any) => (Component: R
         const [, update] = useState({});
         const data = selector ? selector(state) : {state};
 
-        // const dispatch = (action: IReducerType) => {
-        //     setState((reducer as ReducerType)(state as IAppState, action));
-        // };
-
-        const dispatchers = mapDispatchToProps ? mapDispatchToProps(store.dispatch) : { dispatch: store.dispatch };
+        const dispatchers = mapDispatchToProps ? mapDispatchToProps(dispatch) : { dispatch };
 
         useEffect(() => store.subscribe(() => {
             const newData = selector ? selector(state) : { state: state };
